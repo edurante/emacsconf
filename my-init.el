@@ -79,7 +79,17 @@
 (require 'uzumaki)
 (uzumaki-minor-mode 1)
 (uzumaki-set-cycle-mode 'major-mode)
-(define-key uzumaki-minor-mode-map (kbd "C-<") nil)
-(define-key uzumaki-minor-mode-map (kbd "C->") nil)
+;; (define-key uzumaki-minor-mode-map (kbd "C-<") nil)
+;; (define-key uzumaki-minor-mode-map (kbd "C->") nil)
 
+;;dired
+
+;;dired - reuse current buffer by pressing a
+(put 'dired-find-alternate-file 'disabled nil)
+
+;;copy from one dired to the next dired shown
+(setq dired-dwim-target t)
+
+(bind-key "C-c j" 'dired-jump global-map)
+(bind-key "<f11>" 'uzumaki-cycle-to-prev-buffer global-map)
 (bind-key "<f12>" 'compile global-map)
