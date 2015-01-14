@@ -65,9 +65,21 @@
     (when (not package-archive-contents)
       (package-refresh-contents))
 
-    (setq my-packages '(git-commit-mode git-rebase-mode magit magit-annex))
+    (setq my-packages '(bind-key git-commit-mode git-rebase-mode magit magit-annex uzumaki))
 
     (dolist (p my-packages)
       (when (not (package-installed-p p))
 	(package-install p)))
     ))
+
+
+(require 'bind-key)
+(require 'magit-annex)
+
+(require 'uzumaki)
+(uzumaki-minor-mode 1)
+(uzumaki-set-cycle-mode 'major-mode)
+(define-key uzumaki-minor-mode-map (kbd "C-<") nil)
+(define-key uzumaki-minor-mode-map (kbd "C->") nil)
+
+(bind-key "<f12>" 'compile global-map)
