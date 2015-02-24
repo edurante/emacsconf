@@ -73,6 +73,14 @@
     ))
 
 
+(setq inhibit-splash-screen t)
+(setq inhibit-startup-screen t)
+(set-default 'truncate-lines t)
+
+;;ask before quiting emacs with C-x C-c
+(setq confirm-kill-emacs (quote yes-or-no-p))
+
+
 (require 'bind-key)
 (require 'magit-annex)
 
@@ -89,6 +97,23 @@
 
 ;;copy from one dired to the next dired shown
 (setq dired-dwim-target t)
+
+
+;;-h, with -l print sizes in human readable format (e.g., 1k 234M 2G)
+(setq dired-listing-switches "-alh")
+
+(savehist-mode 1)
+
+
+(org-babel-do-load-languages
+      'org-babel-load-languages
+      '((emacs-lisp . t)
+        ;;(tcl . t)
+        (python . t)
+        (sh . t)
+        ))
+
+(setq  org-confirm-babel-evaluate nil)
 
 (bind-key "C-c j" 'dired-jump global-map)
 (bind-key "<f11>" 'uzumaki-cycle-to-prev-buffer global-map)
