@@ -195,6 +195,11 @@
     ))
 
 ;;HELM
+(use-package helm-projectile
+  :bind
+  ("C-c h" . helm-projectile)
+  ("M-o" . helm-projectile))
+
 (use-package helm-bookmark)
 
 
