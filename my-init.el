@@ -65,7 +65,15 @@
     (when (not package-archive-contents)
       (package-refresh-contents))
 
-    (setq my-packages '(bind-key git-commit-mode git-rebase-mode magit magit-annex uzumaki))
+    (setq my-packages '( use-package
+			 bind-key
+			 zenburn-theme
+			 git-commit-mode git-rebase-mode magit magit-annex
+			 projectile
+			 helm
+			 helm-projectile
+			 bookmark+
+			 uzumaki ))
 
     (dolist (p my-packages)
       (when (not (package-installed-p p))
@@ -81,6 +89,7 @@
 (setq confirm-kill-emacs (quote yes-or-no-p))
 
 
+(require 'use-package)
 (require 'bind-key)
 (require 'magit-annex)
 
@@ -90,30 +99,131 @@
 ;; (define-key uzumaki-minor-mode-map (kbd "C-<") nil)
 ;; (define-key uzumaki-minor-mode-map (kbd "C->") nil)
 
-;;dired
-
+;;DIRED
 ;;dired - reuse current buffer by pressing a
 (put 'dired-find-alternate-file 'disabled nil)
-
 ;;copy from one dired to the next dired shown
 (setq dired-dwim-target t)
-
-
 ;;-h, with -l print sizes in human readable format (e.g., 1k 234M 2G)
 (setq dired-listing-switches "-alh")
 
 (savehist-mode 1)
 
 
+;;ORG
+(require 'org)
+(require 'ob-tangle)
 (org-babel-do-load-languages
-      'org-babel-load-languages
-      '((emacs-lisp . t)
-        ;;(tcl . t)
-        (python . t)
-        (sh . t)
-        ))
+ 'org-babel-load-languages
+ '((emacs-lisp . t)
+   ;;(tcl . t)
+   (python . t)
+   (sh . t)
+   ))
 
 (setq  org-confirm-babel-evaluate nil)
+
+;;BOOKMARK+
+(require 'bookmark+)
+(setq bookmark-bmenu-toggle-filenames t)
+(setq bookmark-sort-flag nil)
+(setq bookmark-save-flag t)
+
+(defvar edu/bmkp-choices nil)
+
+(defun edu/bmkp-directory-files (prefix base suffix)
+  (let (myDirList myBmk)
+    (setq myDirList
+          (directory-files (concat user-emacs-directory "bmks") t (concat "^" prefix  base ".*\." suffix "$")))
+    (setq edu/bmkp-choices nil)
+    (dolist (myFile myDirList)
+      (setq myBmk (file-name-nondirectory myFile))
+      (string-match (concat "^" prefix base "\\(.*\\)\." suffix "$") myBmk)
+      (setq myBmk (match-string 2 myBmk))
+      (add-to-list 'edu/bmkp-choices `(,myBmk . ,myFile))
+      )))
+
+(defun edu/bmkp-switch-bookmarkfile ()
+  (interactive)
+  ;;(when (mkst-is-win32) (edu/bmkp-directory-files "bmk" "-\\(all\\|win\\)-" "bmk"))
+  ;;(when (mkst-is-unix)  (edu/bmkp-directory-files "bmk" "-\\(all\\|unix\\)-" "bmk"))
+  (edu/bmkp-directory-files "bmk" "-\\(all\\|unix\\)-" "bmk")
+  (let ((choice (ido-completing-read "bmk: " edu/bmkp-choices nil t)))
+    (setq choice (cdr (assoc choice edu/bmkp-choices)))
+    (bmkp-switch-bookmark-file choice)
+    ))
+
+(defun edu/bookmark-load ()
+  (interactive)
+  ;; (when (mkst-is-win32) (edu/bmkp-directory-files "bmk" "-\\(all\\|win\\)-" "bmk"))
+  ;; (when (mkst-is-unix)  (edu/bmkp-directory-files "bmk" "-\\(all\\|unix\\)-" "bmk"))
+  (edu/bmkp-directory-files "bmk" "-\\(all\\|unix\\)-" "bmk")
+  (let ((choice (ido-completing-read "bmk: " edu/bmkp-choices nil t)))
+    (setq choice (cdr (assoc choice edu/bmkp-choices)))
+    (bookmark-load choice)))
+
+(defun edu/bmkp-empty-file (myFile)
+  (interactive (list (read-file-name "Create empty bookmark file: " (concat user-emacs-directory "bmks/"))))
+  (bmkp-empty-file myFile)
+  (bmkp-switch-bookmark-file myFile))
+
+
+(defun edu/bmkp-set-desktop-bookmark()
+  (interactive)
+  (with-temp-buffer
+    (cd (concat user-emacs-directory "desktops/"))
+    (call-interactively 'bmkp-set-desktop-bookmark)))
+
+
+(defun edu/bookmark-write (myFile)
+  (interactive (list (read-file-name "Save in bookmark file: " (concat user-emacs-directory "bmks/"))))
+  (bookmark-save t myFile))
+
+
+
+;;PROJECTILE
+;;(setq projectile-keymap-prefix (kbd "C-c C-p"))
+(use-package projectile
+  :init
+  (progn
+    (projectile-global-mode)
+    (setq projectile-enable-caching t)
+    (setq projectile-enable-project-root t)
+    ;;(setq projectile-indexing-method 'native) use system command like git find
+    (defconst projectile-mode-line-lighter " P")
+    ;;(edu/on-windows (setq projectile-indexing-method 'alien)) ;;http://tuhdo.github.io/helm-projectile.html
+    ))
+
+;;HELM
+(use-package helm-bookmark)
+
+
+;;KEY BINDING
+;;helm
+(bind-key "C-x <down>" 'helm-filtered-bookmarks global-map)
+(bind-key "C-x b" 'helm-mini global-map)
+(bind-key "M-O" 'helm-projectile-switch-project global-map)
+(bind-key "M-x" 'helm-M-x global-map)
+(bind-key  "M-y"         'helm-show-kill-ring global-map)
+;;(bind-key  "C-c f"       'helm-recentf global-map)
+(bind-key  "C-x C-f"     'helm-find-files global-map)
+(bind-key  "C-x C-d"     'helm-browse-project global-map)
+(bind-key  "C-h C-f"     'helm-apropos global-map)
+
+;;dired
+(bind-key "C-c j" 'dired-jump global-map)
+
+;;bmkp
+(bind-key "C-x p w" 'edu/bookmark-write global-map)
+(bind-key "C-x p 0" 'edu/bmkp-empty-file global-map)
+;;(bind-key "C-x p l" 'edu/bookmark-load global-map)
+(bind-key "C-x p l" 'edu/bmkp-switch-bookmarkfile global-map)
+(bind-key "C-x p L" 'edu/bmkp-switch-bookmarkfile global-map)
+(bind-key "C-x p K" 'edu/bmkp-set-desktop-bookmark global-map)
+(bind-key "C-x r K" 'edu/bmkp-set-desktop-bookmark global-map)
+
+;;functions defines in kde-emacs
+(bind-key "C-%" 'match-paren global-map) ;;for all buffers :)
 
 (bind-key "C-c j" 'dired-jump global-map)
 (bind-key "<f11>" 'uzumaki-cycle-to-prev-buffer global-map)
