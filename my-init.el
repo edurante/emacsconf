@@ -207,7 +207,6 @@
 ;;helm
 (bind-key "C-x <down>" 'helm-filtered-bookmarks global-map)
 (bind-key "C-x b" 'helm-mini global-map)
-(bind-key "M-O" 'helm-projectile-switch-project global-map)
 (bind-key "M-x" 'helm-M-x global-map)
 (bind-key  "M-y"         'helm-show-kill-ring global-map)
 ;;(bind-key  "C-c f"       'helm-recentf global-map)
