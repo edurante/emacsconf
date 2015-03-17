@@ -67,7 +67,7 @@
 
     (setq my-packages '( use-package
 			 bind-key
-			 zenburn-theme
+			 dired+
 			 git-commit-mode git-rebase-mode magit magit-annex
 			 projectile
 			 helm
@@ -100,6 +100,8 @@
 ;; (define-key uzumaki-minor-mode-map (kbd "C->") nil)
 
 ;;DIRED
+(require 'dired+)
+
 ;;dired - reuse current buffer by pressing a
 (put 'dired-find-alternate-file 'disabled nil)
 ;;copy from one dired to the next dired shown
